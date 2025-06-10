@@ -112,7 +112,7 @@ class GameTest {
         game.makeMove(0, 2);
         game.switchPlayer();
         game.makeMove(1, 2);
-        int[] randomMove = game.pickRandomMoveArray();
+        int[] randomMove = game.pickNextComputerMove();
         assertNotNull(randomMove);
         assertEquals(2, randomMove.length);
     }

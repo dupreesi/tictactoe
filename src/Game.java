@@ -7,10 +7,13 @@ public class Game {
     private final Player currentPlayer;
     private char[][] gameBoard;
     private GameMode gameMode;
+    private ComputerDifficultyLevel computerDifficultyLevel;
 
 
     public Game() {
         this.currentPlayer = new Player('X');
+        this.gameMode = null;
+        this.computerDifficultyLevel = null;
         initialiseBoard();
     }
 
@@ -20,6 +23,10 @@ public class Game {
 
     public void setGameMode(GameMode gameMode) {
         this.gameMode = gameMode;
+    }
+
+    public void setComputerDifficultyLevel (ComputerDifficultyLevel level) {
+        this.computerDifficultyLevel = level;
     }
 
     public boolean hasGameMode() {
@@ -38,7 +45,8 @@ public class Game {
         return validMoves;
     }
 
-    public int[] pickRandomMoveArray() {
+    public int[] pickNextComputerMove() {
+        // TODO: Implement a smarter AI for HARD difficulty
         List<int[]> remainingMoves = getRemainingValidMoves();
 
         if (remainingMoves.isEmpty()) {
@@ -104,6 +112,30 @@ public class Game {
         return currentPlayer.getType();
     }
 
+    public enum ComputerDifficultyLevel {
+        EASY,
+        HARD;
+        public static ComputerDifficultyLevel getByCode(String input) {
+            return switch (input) {
+                case "1" -> EASY;
+                case "2" -> HARD;
+                default -> null;
+            };
+        }
+        public String getLabel() {
+            return switch (this) {
+                case EASY -> "Easy";
+                case HARD -> "Hard";
+            };
+        }
+
+        public String getCode() {
+            return switch (this) {
+                case EASY -> "1";
+                case HARD -> "2";
+            };
+        }
+    }
 
     public enum GameMode {
         PLAYER_VS_COMPUTER,

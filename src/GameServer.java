@@ -16,7 +16,11 @@ public class GameServer {
         GameServer server = new GameServer(console);
         server.selectGameMode();
         if (server.game.hasGameMode()) {
-            server.start();
+            GameModeHandler processGameModeHandler = GameModeFactory.getGameModeHandler(server.game.getGameMode());
+            processGameModeHandler.handle(server);
+        } else {
+            console.println("No game mode selected. Exiting...");
+            server.shutdown();
         }
     }
 
@@ -44,7 +48,20 @@ public class GameServer {
     }
 
     public void selectComputerDifficultyLevel() {
-        
+        console.println("Select computer difficulty level:");
+        for (Game.ComputerDifficultyLevel difficultyLevel : Game.ComputerDifficultyLevel.values()) {
+            console.printf("%s - %s%n", difficultyLevel.getCode(), difficultyLevel.getLabel());
+        }
+        String choice = console.input.nextLine();
+        if (listenOnExitCmdAndShutdown(choice)) return;
+       Game.ComputerDifficultyLevel level = Game.ComputerDifficultyLevel.getByCode(choice);
+        if (level == null) {
+            console.println(Messages.INVALID_CHOICE);
+            selectComputerDifficultyLevel();
+            return;
+        }
+        game.setComputerDifficultyLevel(level);
+        console.println("Computer difficulty level set to: " + level.getLabel());
     }
 
     public void handlePlayerMove(String moveString) {
@@ -56,7 +73,7 @@ public class GameServer {
 
         if (isComputerPlayersTurn()) {
             console.println(Messages.THINKING);
-            int[] randomMove = game.pickRandomMoveArray();
+            int[] randomMove = game.pickNextComputerMove();
             processMove(randomMove);
         }
     }
