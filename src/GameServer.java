@@ -43,6 +43,10 @@ public class GameServer {
         }
     }
 
+    public void selectComputerDifficultyLevel() {
+        
+    }
+
     public void handlePlayerMove(String moveString) {
         if (listenOnExitCmdAndShutdown(moveString)) return;
 
