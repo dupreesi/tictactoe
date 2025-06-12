@@ -33,18 +33,18 @@ class GameServerTest {
     void shouldRunGameServerViaMainLogic() {
         String output = runGameWithInput("1\n1 1\n1 2\nexit");
         assertOutputContains(output,
-                GameServer.Messages.GAME_MODE_PROMPT,
+                Constants.MSG_GAME_MODE_PROMPT,
                 "Player vs Player",
-                GameServer.Messages.GAME_START,
+                Constants.MSG_GAME_START,
                 "Player X: 1 1",
                 "Player O: 1 2",
-                GameServer.Messages.SHUTDOWN_MSG);
+                Constants.MSG_SHUTDOWN);
     }
 
     @Test
     void shouldNotProcessPositionBiggerThree() {
         String output = runGameWithInput("1\n1 4");
-        assertOutputContains(output, GameServer.Messages.INVALID_INPUT);
+        assertOutputContains(output, Constants.MSG_INVALID_INPUT);
     }
 
     @Test
@@ -52,7 +52,7 @@ class GameServerTest {
         String output = runGameWithInput("1\n1 1\n1 1");
         assertOutputContains(output,
                 "Player X: 1 1",
-                GameServer.Messages.INVALID_INPUT);
+                Constants.MSG_INVALID_INPUT);
     }
 
     @Test
@@ -64,7 +64,7 @@ class GameServerTest {
                 "Player X: 1 1", "Player O: 1 2", "Player X: 1 3",
                 "Player O: 2 1", "Player X: 2 3", "Player O: 2 2",
                 "Player X: 3 1", "Player O: 3 3", "Player X: 3 2",
-                GameServer.Messages.DRAW_MSG);
+                Constants.MSG_DRAW);
 
         String expectedBoard = " X | O | X \n O | O | X \n X | X | O ";
         assertTrue(output.contains(expectedBoard));
@@ -73,7 +73,7 @@ class GameServerTest {
     @Test
     void shouldHandleShutdownCommand() {
         String output = runGameWithInput("exit");
-        assertOutputContains(output, GameServer.Messages.SHUTDOWN_MSG);
+        assertOutputContains(output, Constants.MSG_SHUTDOWN);
     }
 
 //    @Test

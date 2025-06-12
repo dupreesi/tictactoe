@@ -25,7 +25,7 @@ public class Game {
         this.gameMode = gameMode;
     }
 
-    public void setComputerDifficultyLevel (ComputerDifficultyLevel level) {
+    public void setComputerDifficultyLevel(ComputerDifficultyLevel level) {
         this.computerDifficultyLevel = level;
     }
 
@@ -46,7 +46,10 @@ public class Game {
     }
 
     public int[] pickNextComputerMove() {
-        // TODO: Implement a smarter AI for HARD difficulty
+        System.out.printf("difficultylevel" + computerDifficultyLevel);
+        /* TODO: Based on difficulty select the correct way of making moves (minimax / current way)
+         */
+
         List<int[]> remainingMoves = getRemainingValidMoves();
 
         if (remainingMoves.isEmpty()) {
@@ -110,52 +113,6 @@ public class Game {
 
     public char getCurrentPlayer() {
         return currentPlayer.getType();
-    }
-
-    public enum ComputerDifficultyLevel {
-        EASY,
-        HARD;
-        public static ComputerDifficultyLevel getByCode(String input) {
-            return switch (input) {
-                case "1" -> EASY;
-                case "2" -> HARD;
-                default -> null;
-            };
-        }
-        public String getLabel() {
-            return switch (this) {
-                case EASY -> "Easy";
-                case HARD -> "Hard";
-            };
-        }
-
-        public String getCode() {
-            return switch (this) {
-                case EASY -> "1";
-                case HARD -> "2";
-            };
-        }
-    }
-
-    public enum GameMode {
-        PLAYER_VS_COMPUTER,
-        PLAYER_VS_PLAYER;
-
-
-        public static GameMode getByCode(String input) {
-            return switch (input) {
-                case "1" -> PLAYER_VS_PLAYER;
-                case "2" -> PLAYER_VS_COMPUTER;
-                default -> null;
-            };
-        }
-
-        public String getLabel() {
-            return switch (this) {
-                case PLAYER_VS_PLAYER -> "Player vs Player";
-                case PLAYER_VS_COMPUTER -> "Player vs Computer";
-            };
-        }
     }
 }
 
