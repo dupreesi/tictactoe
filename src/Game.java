@@ -5,6 +5,7 @@ import java.util.Random;
 public class Game {
 
     private final Player currentPlayer;
+    // todo add GameBoard class
     private char[][] gameBoard;
     private GameMode gameMode;
     private ComputerDifficultyLevel computerDifficultyLevel;
@@ -33,30 +34,9 @@ public class Game {
         return getGameMode() != null;
     }
 
-    public List<int[]> getRemainingValidMoves() {
-        List<int[]> validMoves = new ArrayList<>();
-        for (int row = 0; row < gameBoard.length; row++) {
-            for (int col = 0; col < gameBoard[row].length; col++) {
-                if (gameBoard[row][col] == ' ') {
-                    validMoves.add(new int[]{row, col});
-                }
-            }
-        }
-        return validMoves;
-    }
-
     public int[] pickNextComputerMove() {
-        System.out.printf("difficultylevel" + computerDifficultyLevel);
-        /* TODO: Based on difficulty select the correct way of making moves (minimax / current way)
-         */
-
-        List<int[]> remainingMoves = getRemainingValidMoves();
-
-        if (remainingMoves.isEmpty()) {
-            return null;
-        }
-        Random random = new Random();
-        return remainingMoves.get(random.nextInt(remainingMoves.size()));
+        ComputerMoveHandler computerMoveHandler = ComputerMoveFactory.getComputerMoveHandler(computerDifficultyLevel, gameBoard);
+        return computerMoveHandler.getNextMove();
     }
 
     public void initialiseBoard() {
