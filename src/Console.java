@@ -24,11 +24,11 @@ public class Console {
     }
 
     public void printGameBoard(char[][] gameBoard) {
-        println(Messages.GAMEBOARD_BORDER);
+        println(Constants.MSG_GAMEBOARD_BORDER);
         for (int i = 0; i < 3; i++) {
-            printf(Messages.GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
+            printf(Constants.MSG_GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
         }
-        println(Messages.GAMEBOARD_BORDER);
+        println(Constants.MSG_GAMEBOARD_BORDER);
     }
 
     public String nextLine() {
@@ -36,15 +36,14 @@ public class Console {
     }
 
     public boolean hasNextLine() {
-        return input.hasNextLine();
+        try {
+            return input.hasNextLine();
+        } catch (IllegalStateException e) {
+            return false;
+        }
     }
 
     public void close() {
         input.close();
-    }
-
-    public static class Messages {
-        public static final String GAMEBOARD_BORDER = "-----------";
-        public static final String GAMEBOARD_CONTENT = " %c | %c | %c %n";
     }
 }

@@ -16,6 +16,7 @@ class GameServerTest {
         printStream = new PrintStream(outputStream);
     }
 
+
     private String runGameWithInput(String input) {
         ByteArrayInputStream testIn = new ByteArrayInputStream(input.getBytes());
         Console console = new Console(testIn, printStream);
@@ -76,11 +77,11 @@ class GameServerTest {
         assertOutputContains(output, Constants.MSG_SHUTDOWN);
     }
 
-//    @Test
-//    void shouldHandleComputerModeSelect() {
-//        String output = runGameWithInput("2\n1 1\n");
-//        assertOutputContains(output, "Player vs Computer");
-//    }
+    @Test
+    void shouldHandleComputerModeSelectEasy() {
+        String output = runGameWithInput("2\n1 \n1");
+        assertOutputContains(output, "Selected: Player vs Computer", "Select computer difficulty level:", "Computer difficulty level set to: Easy");
+    }
 
     @Test
     void shouldHandlePlayerModeSelect() {

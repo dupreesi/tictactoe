@@ -15,4 +15,6 @@ public class Constants {
     public static final String MSG_INPUT_PROMPT = "Player %c, enter numbers for row and column and press Enter (type 'exit' to quit):%n";
     public static final String MSG_GAME_START = "Game server is running...";
     public static final String MSG_PLAYER_MOVE = "Player %c: %d %d%n";
+    public static final String MSG_GAMEBOARD_BORDER = "-----------";
+    public static final String MSG_GAMEBOARD_CONTENT = " %c | %c | %c %n";
 }
