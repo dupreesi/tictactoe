@@ -25,27 +25,6 @@ public class GameServer {
         return isRunning;
     }
 
-
-//    private void initialize() {
-//        selectGameMode();
-//        if (!isRunning) return;
-//
-//        if (!game.hasGameMode()) {
-//            console.println("No game mode selected. Exiting...");
-//            shutdown();
-//            return;
-//        }
-//
-//        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
-//            selectComputerDifficultyLevel();
-//            if (!isRunning) return;
-//        }
-//
-//        console.println(Constants.MSG_GAME_START);
-//
-//        isRunning = true;
-//    }
-
     private void initialize() {
         if (!selectGameMode()) return;
 

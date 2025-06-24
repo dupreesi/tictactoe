@@ -19,10 +19,6 @@ public class Game {
         return currentPlayer.getSymbol();
     }
 
-    public PlayerType getCurrentPlayer() {
-        return currentPlayer;
-    }
-
     public void switchPlayer() {
         currentPlayer = currentPlayer.switchType();
     }
@@ -42,10 +38,6 @@ public class Game {
 
     public void setComputerDifficulty(ComputerDifficultyLevel difficulty) {
         this.difficulty = difficulty;
-    }
-
-    public ComputerDifficultyLevel getDifficulty() {
-        return difficulty;
     }
 
     public boolean isGameOver() {
