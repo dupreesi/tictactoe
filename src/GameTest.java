@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.*;
 
-import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,107 +14,113 @@ class GameTest {
 
     @Test
     void testValidMove() {
-        assertTrue(game.isValidMove(1, 2));
+        assertTrue(game.getBoard().isValidMove(1, 2));
     }
 
     @Test
     void testMakeMove() {
-        game.makeMove(1, 2);
-        assertEquals('X', game.getGameBoard()[1][2]);
+        game.getBoard().makeMove(1, 2, game.getCurrentPlayerSymbol());
+        assertEquals('X', game.getBoard().getCell(1, 2));
     }
 
     @Test
     void testMoveOutOfBounds() {
-        assertFalse(game.isValidMove(-1, 0)); // Negative row
-        assertFalse(game.isValidMove(0, -1)); // Negative column
-        assertFalse(game.isValidMove(3, 0));  // Row too high
-        assertFalse(game.isValidMove(0, 3));  // Column too high
+        assertFalse(game.getBoard().isValidMove(-1, 0)); // Negative row
+        assertFalse(game.getBoard().isValidMove(0, -1)); // Negative column
+        assertFalse(game.getBoard().isValidMove(3, 0));  // Row too high
+        assertFalse(game.getBoard().isValidMove(0, 3));  // Column too high
     }
 
     @Test
     void testMoveOnOccupiedCell() {
-        game.makeMove(1, 1); // First move (valid)
-        assertFalse(game.isValidMove(1, 1)); // Try to place another move at the same position
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol()); // First move (valid)
+        assertFalse(game.getBoard().isValidMove(1, 1)); // Try to place another move at the same position
     }
 
     @Test
     void testMultipleMoves() {
-        game.makeMove(0, 0); // Player 'X' moves
+        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
         game.switchPlayer();
-        game.makeMove(1, 1); // Player 'O' moves
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
         game.switchPlayer();
-        game.makeMove(2, 2); // Player 'X' moves again
+        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol());
 
-        assertEquals('X', game.getGameBoard()[0][0]);
-        assertEquals('O', game.getGameBoard()[1][1]);
-        assertEquals('X', game.getGameBoard()[2][2]);
+        assertEquals('X', game.getBoard().getCell(0, 0));
+        assertEquals('O', game.getBoard().getCell(1, 1));
+        assertEquals('X', game.getBoard().getCell(2, 2));
     }
 
     @Test
     void shouldDetectIfEmptyCellsExist() {
-        assertFalse(game.boardIsFull());
+        assertFalse(game.getBoard().isFull());
     }
 
     @Test
     void detectWinnerHorizontally() {
-        game.makeMove(0, 0);
-        game.makeMove(1, 1);
-        game.makeMove(2, 2);
-        assertTrue(game.detectWinner());
+        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol());
+        assertTrue(game.isWinningMove());
     }
 
     @Test
     void detectWinnerVertically() {
-        game.makeMove(0, 0);
-        game.makeMove(1, 0);
-        game.makeMove(2, 0);
-        assertTrue(game.detectWinner());
+        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(1, 0, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(2, 0, game.getCurrentPlayerSymbol());
+        assertTrue(game.isWinningMove());
     }
 
     @Test
     void detectWinnerDiagonallyOne() {
-        game.makeMove(0, 0);
-        game.makeMove(1, 1);
-        game.makeMove(2, 2);
-        assertTrue(game.detectWinner());
+        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol());
+        assertTrue(game.isWinningMove());
     }
 
     @Test
     void detectWinnerDiagonallyTwo() {
-        game.makeMove(0, 2);
-        game.makeMove(1, 1);
-        game.makeMove(2, 0);
-        assertTrue(game.detectWinner());
+        game.getBoard().makeMove(0, 2, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(2, 0, game.getCurrentPlayerSymbol());
+        assertTrue(game.isWinningMove());
     }
 
     @Test
     void getCurrentPlayerAndSwitchType() {
-        assertEquals(game.getCurrentPlayer(), 'X');
+        assertEquals(game.getCurrentPlayerSymbol(), 'X');
         game.switchPlayer();
-        assertEquals(game.getCurrentPlayer(), 'O');
+        assertEquals(game.getCurrentPlayerSymbol(), 'O');
     }
 
     @Test
-    void getRemainingValidMoves() {
-        game.makeMove(0, 2);
+    void handleRandomComputerMove() {
+        ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
+        game.setComputerDifficulty(ComputerDifficultyLevel.EASY);
+
+        game.getBoard().makeMove(0, 2, game.getCurrentPlayerSymbol());
         game.switchPlayer();
-        assertEquals(8, game.getRemainingValidMoves().size());
-        game.makeMove(1, 2);
-        assertEquals(7, game.getRemainingValidMoves().size());
-        for (int[] move : game.getRemainingValidMoves()) {
-            assertFalse(Arrays.equals(move, new int[]{0, 2}));
-            assertFalse(Arrays.equals(move, new int[]{1, 2}));
+
+        assertEquals(8, computerMoveRandom.getRemainingValidMoves().size());
+
+        game.getBoard().makeMove(1, 2, game.getCurrentPlayerSymbol());
+        assertEquals(7, computerMoveRandom.getRemainingValidMoves().size());
+
+        for (int[] move : computerMoveRandom.getRemainingValidMoves()) {
+            assertFalse(java.util.Arrays.equals(move, new int[]{0, 2}));
+            assertFalse(java.util.Arrays.equals(move, new int[]{1, 2}));
         }
-    }
 
-    @Test
-    void getRandomMove() {
-        game.makeMove(0, 2);
-        game.switchPlayer();
-        game.makeMove(1, 2);
-        int[] randomMove = game.pickRandomMoveArray();
-        assertNotNull(randomMove);
-        assertEquals(2, randomMove.length);
-    }
+        int[] nextMove = game.getComputerMove();
+        assertNotNull(nextMove);
+        assertEquals(2, nextMove.length);
 
+        List<int[]> remainingMoves = computerMoveRandom.getRemainingValidMoves();
+
+        boolean moveIsValid = remainingMoves.stream()
+                .anyMatch(move -> move[0] == nextMove[0] && move[1] == nextMove[1]);
+
+        assertTrue(moveIsValid);
+    }
 }

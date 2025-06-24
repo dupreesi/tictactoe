@@ -1,60 +1,175 @@
 public class GameServer {
     public final Console console;
-    private final Game game;
     private boolean isRunning;
+    private Game game;
 
     public GameServer(Console console) {
-        this.game = new Game();
         this.console = console;
+        this.game = new Game();
     }
 
     public static void main(String[] args) {
-        runGameServer(new Console());
+        launchMainWithConsole(new Console());
     }
 
-    private static void runGameServer(Console console) {
+    public static void launchMainWithConsole(Console console) {
         GameServer server = new GameServer(console);
-        server.selectGameMode();
-        if (server.game.hasGameMode()) {
+        server.initialize();
+
+        if (server.isRunning()) {
             server.start();
         }
     }
 
-    // For testing with mock console
-    public static void launchMainWithConsole(Console console) {
-        runGameServer(console);
+    public boolean isRunning() {
+        return isRunning;
     }
 
-    public void selectGameMode() {
-        console.println(Messages.GAME_MODE_PROMPT);
 
-        String choice = console.input.nextLine();
+//    private void initialize() {
+//        selectGameMode();
+//        if (!isRunning) return;
+//
+//        if (!game.hasGameMode()) {
+//            console.println("No game mode selected. Exiting...");
+//            shutdown();
+//            return;
+//        }
+//
+//        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
+//            selectComputerDifficultyLevel();
+//            if (!isRunning) return;
+//        }
+//
+//        console.println(Constants.MSG_GAME_START);
+//
+//        isRunning = true;
+//    }
 
-        if (listenOnExitCmdAndShutdown(choice)) return;
+    private void initialize() {
+        if (!selectGameMode()) return;
 
-        Game.GameMode selectedMode = Game.GameMode.getByCode(choice);
-
-        if (selectedMode == null) {
-            console.println(Messages.INVALID_CHOICE);
-            selectGameMode();
-        } else {
-            game.setGameMode(selectedMode);
-            console.println("Selected: " + selectedMode.getLabel());
+        if (!game.hasGameMode()) {
+            console.println("No game mode selected. Exiting...");
+            shutdown();
+            return;
         }
+
+        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
+            if (!selectComputerDifficultyLevel()) return;
+
+            if (!game.hasComputerDifficulty()) {
+                console.println("No difficulty selected. Exiting...");
+                shutdown();
+                return;
+            }
+        }
+
+        console.println(Constants.MSG_GAME_START);
+        isRunning = true;
+    }
+
+
+    public void start() {
+        if (!isRunning) return; // game wasn’t initialized properly
+
+        if (game.isComputerTurn()) {
+            handleComputerTurn();
+        } else {
+            promptForPlayerMove();
+        }
+
+        while (isRunning && console.hasNextLine()) {
+            handlePlayerMove(console.nextLine());
+        }
+    }
+
+
+    private void promptForPlayerMove() {
+        console.printf(Constants.MSG_INPUT_PROMPT, game.getCurrentPlayerSymbol());
+    }
+
+    private void handleComputerTurn() {
+        console.println(Constants.MSG_THINKING);
+
+        int[] move = game.getComputerMove();
+        game.processPlayerMove(move[0], move[1]);
+        console.printf(Constants.MSG_PLAYER_MOVE, game.getCurrentPlayerSymbol(), move[0] + 1, move[1] + 1);
+        console.printGameBoard(game.getBoard().getCopy());
+
+        if (checkGameOver()) return;
+
+        game.switchPlayer(); // switch to human
+        promptForPlayerMove();
     }
 
     public void handlePlayerMove(String moveString) {
         if (listenOnExitCmdAndShutdown(moveString)) return;
 
-        int[] move = parseMove(moveString);
-
-        processMove(move);
-
-        if (isComputerPlayersTurn()) {
-            console.println(Messages.THINKING);
-            int[] randomMove = game.pickRandomMoveArray();
-            processMove(randomMove);
+        int[] move = MoveParser.parse(moveString, console);
+        if (move == null || !game.processPlayerMove(move[0], move[1])) {
+            console.println(Constants.MSG_INVALID_INPUT);
+            return;
         }
+
+        console.printf(Constants.MSG_PLAYER_MOVE, game.getCurrentPlayerSymbol(), move[0] + 1, move[1] + 1);
+        console.printGameBoard(game.getBoard().getCopy());
+
+        if (checkGameOver()) return;
+
+        game.switchPlayer();
+
+        if (game.isComputerTurn()) {
+            handleComputerTurn();
+        } else {
+            promptForPlayerMove();
+        }
+    }
+
+    public boolean checkGameOver() {
+        if (game.isGameOver()) {
+            console.println(game.getGameOverMessage());
+            shutdown();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean selectGameMode() {
+        console.println(Constants.MSG_GAME_MODE_PROMPT);
+        String choice = console.input.nextLine();
+
+        if (listenOnExitCmdAndShutdown(choice)) return false;
+
+        GameMode selected = GameMode.getByCode(choice);
+        if (selected == null) {
+            console.println(Constants.MSG_INVALID_CHOICE);
+            return selectGameMode(); // retry
+        }
+
+        game.setGameMode(selected);
+        console.println("Selected: " + selected.getLabel());
+        return true;
+    }
+
+    public boolean selectComputerDifficultyLevel() {
+        console.println("Select computer difficulty level:");
+        for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
+            console.printf("%s - %s%n", level.getCode(), level.getLabel());
+        }
+
+        String choice = console.input.nextLine();
+        if (listenOnExitCmdAndShutdown(choice)) return false;
+
+        ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
+        if (level == null) {
+            console.println(Constants.MSG_INVALID_CHOICE);
+            return selectComputerDifficultyLevel(); // retry
+        }
+
+        game.setComputerDifficulty(level);
+        console.println("Computer difficulty level set to: " + level.getLabel());
+        return true;
     }
 
     private boolean listenOnExitCmdAndShutdown(String input) {
@@ -65,96 +180,9 @@ public class GameServer {
         return false;
     }
 
-    private void processMove(int[] move) {
-        if (move == null) return;
-
-        int row = move[0];
-        int col = move[1];
-
-        if (!game.isValidMove(row, col)) {
-            console.println(Messages.INVALID_INPUT);
-            return;
-        }
-
-        game.makeMove(row, col);
-        console.printf(Messages.PLAYER_MOVE, game.getCurrentPlayer(), move[0] + 1, move[1] + 1);
-        console.printGameBoard(game.getGameBoard());
-
-        if (checkGameOver()) return;
-
-        game.switchPlayer();
-        console.printf(Messages.INPUT_PROMPT, game.getCurrentPlayer());
-    }
-
-    // extract class for validation and parsing
-    private int[] parseMove(String moveString) {
-        String[] parts = moveString.split(" ");
-
-        if (parts.length != 2) {
-            console.println(Messages.INVALID_NUMBERS);
-            return null;
-        }
-
-        try {
-            int row = Integer.parseInt(parts[0]) - 1;
-            int col = Integer.parseInt(parts[1]) - 1;
-            return new int[]{row, col};
-        } catch (NumberFormatException e) {
-            console.println(Messages.INVALID_NUMBERS);
-            return null;
-        }
-    }
-
-    public boolean checkGameOver() {
-        if (game.detectWinner()) {
-            console.printf(Messages.PLAYER_WON, game.getCurrentPlayer());
-            shutdown();
-            return true;
-        }
-
-        if (game.boardIsFull()) {
-            console.println(Messages.DRAW_MSG);
-            shutdown();
-            return true;
-        }
-        return false;
-    }
-
     public void shutdown() {
         isRunning = false;
-        console.println(Messages.SHUTDOWN_MSG);
+        console.println(Constants.MSG_SHUTDOWN);
         console.close();
-    }
-
-    public void start() {
-        isRunning = true;
-        console.println(Messages.GAME_START);
-        console.printf(Messages.INPUT_PROMPT, game.getCurrentPlayer());
-        while (isRunning && (console.hasNextLine() || isComputerPlayersTurn())) {
-            handlePlayerMove(console.nextLine());
-        }
-    }
-
-    private boolean isComputerPlayersTurn() {
-        return game.getGameMode() == Game.GameMode.PLAYER_VS_COMPUTER && game.getCurrentPlayer() == 'O';
-    }
-
-    public static class Messages {
-        public static final String INVALID_CHOICE = "Select valid game mode";
-        public static final String SHUTDOWN_MSG = "Game server shutting down...";
-        public static final String THINKING = "Thinking...";
-        public static final String INVALID_INPUT = "Invalid input! Enter row and column (e.g., '1 2').";
-        public static final String INVALID_NUMBERS = "Invalid input! Enter numbers only.";
-        public static final String GAME_MODE_PROMPT =
-                """
-                        Select game mode:
-                        1 - Player vs Player
-                        2 - Player vs Computer
-                        Enter your choice (1 or 2) or type 'exit' to quit:\s""";
-        public static final String DRAW_MSG = "The game is a draw!";
-        public static final String PLAYER_WON = "Player %c won!%n";
-        public static final String INPUT_PROMPT = "Player %c, enter numbers for row and column and press Enter (type 'exit' to quit):%n";
-        public static final String GAME_START = "Game server is running...";
-        public static final String PLAYER_MOVE = "Player %c: %d %d%n";
     }
 }
