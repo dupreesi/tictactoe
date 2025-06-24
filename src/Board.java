@@ -6,6 +6,18 @@ public class Board {
         clear();
     }
 
+    protected Board(String boardAsString) {
+        this();
+        if (boardAsString.length() != 9) {
+            throw new RuntimeException("Incorrect number of chars in Board String: " + boardAsString.length());
+        }
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = boardAsString.charAt(i * 3 + j);
+            }
+        }
+    }
 
     public void clear() {
         for (int i = 0; i < 3; i++) {
@@ -31,7 +43,11 @@ public class Board {
         return row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == ' ';
     }
 
+    // take position and player
+    // map position to coord.
+    // set board
     public void makeMove(int row, int col, char player) {
+
         board[row][col] = player;
     }
 
@@ -44,5 +60,14 @@ public class Board {
         for (int i = 0; i < 3; i++)
             System.arraycopy(board[i], 0, copy[i], 0, 3);
         return copy;
+    }
+
+
+    @Override
+    public String toString() {
+        for (int i = 0; i < 3; i++) {
+            System.out.printf(Constants.MSG_GAMEBOARD_CONTENT, board[i][0], board[i][1], board[i][2]);
+        }
+        return "";
     }
 }

@@ -11,9 +11,9 @@ public class ComputerMoveRandom implements ComputerMoveHandler {
 
     public List<int[]> getRemainingValidMoves() {
         List<int[]> validMoves = new ArrayList<>();
-        for (int row = 0; row < 3; row++) {            // board size is 3x3, so loop from 0 to 2
+        for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                if (gameBoard.getCell(row, col) == ' ') {   // use getCell() instead of array access
+                if (gameBoard.getCell(row, col) == ' ') {
                     validMoves.add(new int[]{row, col});
                 }
             }
