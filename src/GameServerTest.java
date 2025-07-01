@@ -16,12 +16,15 @@ class GameServerTest {
         printStream = new PrintStream(outputStream);
     }
 
-
     private String runGameWithInput(String input) {
-        ByteArrayInputStream testIn = new ByteArrayInputStream(input.getBytes());
-        Console console = new Console(testIn, printStream);
+        Console console = consoleWithInput(input);
         GameServer.launchMainWithConsole(console);
         return outputStream.toString();
+    }
+
+    private Console consoleWithInput(String input) {
+        ByteArrayInputStream testIn = new ByteArrayInputStream(input.getBytes());
+        return new Console(testIn, printStream);
     }
 
     private void assertOutputContains(String output, String... messages) {

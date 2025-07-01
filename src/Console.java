@@ -3,6 +3,7 @@ import java.io.PrintStream;
 import java.util.Scanner;
 
 public class Console {
+    // todo: hide your internals
     public final Scanner input;
     private final PrintStream output;
 
@@ -15,6 +16,9 @@ public class Console {
         this.input = new Scanner(in);
     }
 
+    // displayMessage(String message)
+    // promptForInput(String message, somethingSomething)
+
     public void println(String msg) {
         output.println(msg);
     }
@@ -23,6 +27,7 @@ public class Console {
         output.printf(format, args);
     }
 
+    // todo: does this belong here?
     public void printGameBoard(char[][] gameBoard) {
         println(Constants.MSG_GAMEBOARD_BORDER);
         for (int i = 0; i < 3; i++) {

@@ -115,8 +115,15 @@ public class GameServer {
     }
 
     private boolean selectGameMode() {
+
+//        while (console.promptMode()) {
+//
+//        }
+
+
         while (true) {
             console.println(Constants.MSG_GAME_MODE_PROMPT);
+            // demeter violation, lack of encapsulation of public members (input, output)
             String choice = console.input.nextLine();
 
             if (listenOnExitCmdAndShutdown(choice)) return false;
