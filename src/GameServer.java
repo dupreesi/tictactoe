@@ -115,40 +115,44 @@ public class GameServer {
     }
 
     private boolean selectGameMode() {
-        console.println(Constants.MSG_GAME_MODE_PROMPT);
-        String choice = console.input.nextLine();
+        while (true) {
+            console.println(Constants.MSG_GAME_MODE_PROMPT);
+            String choice = console.input.nextLine();
 
-        if (listenOnExitCmdAndShutdown(choice)) return false;
+            if (listenOnExitCmdAndShutdown(choice)) return false;
 
-        GameMode selected = GameMode.getByCode(choice);
-        if (selected == null) {
-            console.println(Constants.MSG_INVALID_CHOICE);
-            return selectGameMode(); // retry
+            GameMode selected = GameMode.getByCode(choice);
+            if (selected == null) {
+                console.println(Constants.MSG_INVALID_CHOICE);
+                continue; // retry
+            }
+
+            game.setGameMode(selected);
+            console.println("Selected: " + selected.getLabel());
+            return true;
         }
-
-        game.setGameMode(selected);
-        console.println("Selected: " + selected.getLabel());
-        return true;
     }
 
     public boolean selectComputerDifficultyLevel() {
-        console.println("Select computer difficulty level:");
-        for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
-            console.printf("%s - %s%n", level.getCode(), level.getLabel());
+        while (true) {
+            console.println("Select computer difficulty level:");
+            for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
+                console.printf("%s - %s%n", level.getCode(), level.getLabel());
+            }
+
+            String choice = console.input.nextLine();
+            if (listenOnExitCmdAndShutdown(choice)) return false;
+
+            ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
+            if (level == null) {
+                console.println(Constants.MSG_INVALID_CHOICE);
+                continue; // retry
+            }
+
+            game.setComputerDifficulty(level);
+            console.println("Computer difficulty level set to: " + level.getLabel());
+            return true;
         }
-
-        String choice = console.input.nextLine();
-        if (listenOnExitCmdAndShutdown(choice)) return false;
-
-        ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
-        if (level == null) {
-            console.println(Constants.MSG_INVALID_CHOICE);
-            return selectComputerDifficultyLevel(); // retry
-        }
-
-        game.setComputerDifficulty(level);
-        console.println("Computer difficulty level set to: " + level.getLabel());
-        return true;
     }
 
     private boolean listenOnExitCmdAndShutdown(String input) {
