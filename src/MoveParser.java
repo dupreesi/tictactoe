@@ -2,7 +2,7 @@ public class MoveParser {
     public static int[] parse(String input, Console console) {
         String[] parts = input.trim().split(" ");
         if (parts.length != 2) {
-            console.println(Constants.MSG_INVALID_NUMBERS);
+            console.displayMessage(Constants.MSG_INVALID_NUMBERS);
             return null;
         }
         try {
@@ -10,7 +10,7 @@ public class MoveParser {
             int col = Integer.parseInt(parts[1]) - 1;
             return new int[]{row, col};
         } catch (NumberFormatException e) {
-            console.println(Constants.MSG_INVALID_NUMBERS);
+            console.displayMessage(Constants.MSG_INVALID_NUMBERS);
             return null;
         }
     }

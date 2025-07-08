@@ -95,18 +95,18 @@ class GameServerTest {
     @Test
     void shouldRetryGameModeSelectionOnInvalidInput() {
         String output = runGameWithInput("invalid\n1");
-        assertOutputContains(output, 
-            Constants.MSG_INVALID_CHOICE,
-            "Player vs Player");
+        assertOutputContains(output,
+                Constants.MSG_INVALID_CHOICE,
+                "Player vs Player");
     }
 
     @Test
     void shouldRetryComputerDifficultySelectionOnInvalidInput() {
         String output = runGameWithInput("2\ninvalid\n1");
         assertOutputContains(output,
-            "Select computer difficulty level:",
-            Constants.MSG_INVALID_CHOICE,
-            "Computer difficulty level set to: Easy");
+                "Select computer difficulty level:",
+                Constants.MSG_INVALID_CHOICE,
+                "Computer difficulty level set to: Easy");
     }
 }
 

@@ -1,8 +1,10 @@
 public class Board {
     private char[][] board;
+    private Console console;
 
     public Board() {
         board = new char[3][3];
+        console = new Console();
         clear();
     }
 
@@ -44,5 +46,13 @@ public class Board {
         for (int i = 0; i < 3; i++)
             System.arraycopy(board[i], 0, copy[i], 0, 3);
         return copy;
+    }
+
+    public void draw(char[][] gameBoard) {
+        console.displayMessage(Constants.MSG_GAMEBOARD_BORDER);
+        for (int i = 0; i < 3; i++) {
+            console.displayMessage(Constants.MSG_GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
+        }
+        console.displayMessage(Constants.MSG_GAMEBOARD_BORDER);
     }
 }
