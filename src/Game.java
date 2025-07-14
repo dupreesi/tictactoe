@@ -6,6 +6,7 @@ public class Game {
     private Player currentPlayer;
     private GameMode gameMode;
     private ComputerMoveHandler computerMoveHandler;
+    private boolean isRunning;
 
     public Game(Console console) {
         this.console = console;
@@ -15,6 +16,20 @@ public class Game {
         this.playerX = playerX;
         this.playerO = playerO;
         this.currentPlayer = playerX;
+    }
+
+    public void selectPlayersByGameMode(GameMode gameMode) {
+        Player playerX = new HumanPlayer('X', console);
+        Player playerO;
+        if (gameMode == GameMode.PLAYER_VS_COMPUTER) {
+            if (computerMoveHandler == null) {
+                throw new IllegalStateException(Messages.COMPUTER_HANDLER_NOT_SET_BEFORE_PLAYER_INIT);
+            }
+            playerO = new ComputerPlayer('O', computerMoveHandler);
+        } else {
+            playerO = new HumanPlayer('O', console);
+        }
+        setPlayers(playerX, playerO);
     }
 
     public Player getCurrentPlayer() {
@@ -83,19 +98,78 @@ public class Game {
         this.computerMoveHandler = ComputerMoveFactory.getComputerMoveHandler(level, this.getBoard());
     }
 
-    public void setPlayers(GameMode gameMode) {
-        Player playerX = new HumanPlayer('X', console);
-        Player playerO;
-        if (gameMode == GameMode.PLAYER_VS_COMPUTER) {
-            if (computerMoveHandler == null) {
-                throw new IllegalStateException(Messages.COMPUTER_HANDLER_NOT_SET_BEFORE_PLAYER_INIT);
+    public void play() {
+        isRunning = true;
+        while (isRunning) {
+            Player currentPlayer = getCurrentPlayer();
+            int[] move = currentPlayer.getMove();
+            if (move == null) {
+                isRunning = false;
+                break;
             }
-            playerO = new ComputerPlayer('O', computerMoveHandler);
-        } else {
-            playerO = new HumanPlayer('O', console);
+            if (!processPlayerMove(move[0], move[1])) {
+                console.displayMessage(GameServer.Messages.INVALID_INPUT);
+                continue;
+            }
+
+            console.displayMessage(GameServer.Messages.PLAYER_MOVE, currentPlayer.getSymbol(), move[0] + 1, move[1] + 1);
+            board.draw(board.getCopy());
+
+            if (isGameOver()) {
+                console.displayMessage(getGameOverMessage());
+                break;
+            } else {
+                switchPlayer();
+            }
         }
-        setPlayers(playerX, playerO);
     }
+
+    public boolean selectGameMode() {
+        console.displayMessage(GameServer.Messages.GAME_MODE_PROMPT);
+
+        while (console.promptingForInput()) {
+            String choice = console.getInputValue();
+
+            if ("exit".equalsIgnoreCase(choice)) {
+                return false;
+            }
+
+            GameMode selected = GameMode.getByCode(choice);
+            if (selected == null) {
+                console.displayMessage(GameServer.Messages.INVALID_CHOICE);
+                console.displayMessage(GameServer.Messages.GAME_MODE_PROMPT);
+                continue;
+            }
+            setGameMode(selected);
+            console.displayMessage(GameServer.Messages.SELECTED_MODE, selected.getLabel());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean selectComputerDifficultyLevel() {
+        console.displayMessage(GameServer.Messages.DIFFICULTY_PROMPT);
+        while (true) {
+            for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
+                console.displayMessage(GameServer.Messages.DIFFICULTY_OPTION_FORMAT, level.getCode(), level.getLabel());
+            }
+
+            String choice = console.getInputValue();
+            if ("exit".equalsIgnoreCase(choice)) {
+                return false;
+            }
+
+            ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
+            if (level == null) {
+                console.displayMessage(GameServer.Messages.INVALID_CHOICE);
+                continue; // retry
+            }
+            setComputerDifficulty(level);
+            console.displayMessage(GameServer.Messages.DIFFICULTY_SELECTED, level.getLabel());
+            return true;
+        }
+    }
+
 
     public static class Messages {
         public static final String DRAW = "The game is a draw!";

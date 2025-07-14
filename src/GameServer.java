@@ -1,13 +1,11 @@
 public class GameServer {
     private final Console console;
     private final Game game;
-    private final Board board;
     private boolean isRunning;
 
     public GameServer(Console console) {
         this.console = console;
         this.game = new Game(console);
-        this.board = game.getBoard();
     }
 
     public static void main(String[] args) {
@@ -28,99 +26,31 @@ public class GameServer {
     }
 
     private void initialize() {
-        if (!selectGameMode()) return;
-
-        GameMode gameMode = game.getGameMode();
-
-        if (gameMode == GameMode.PLAYER_VS_COMPUTER) {
-            if (!selectComputerDifficultyLevel()) return;
+        if (!game.selectGameMode()) {
+            shutdown();
+            return;
         }
 
-        game.setPlayers(gameMode);
+        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
+            if (!game.selectComputerDifficultyLevel()) {
+                shutdown();
+                return;
+            }
+        }
 
+        game.selectPlayersByGameMode(game.getGameMode());
         console.displayMessage(Messages.GAME_START);
         isRunning = true;
     }
 
+
     public void start() {
-        while (isRunning) {
-            Player currentPlayer = game.getCurrentPlayer();
-            int[] move = currentPlayer.getMove();
-            if (move == null) {
-                shutdown();
-                return;
-            }
-            if (!game.processPlayerMove(move[0], move[1])) {
-                console.displayMessage(Messages.INVALID_INPUT);
-                continue;
-            }
-
-            console.displayMessage(Messages.PLAYER_MOVE, currentPlayer.getSymbol(), move[0] + 1, move[1] + 1);
-            board.draw(board.getCopy());
-
-            if (game.isGameOver()) {
-                console.displayMessage(game.getGameOverMessage());
-                shutdown();
-            } else {
-                game.switchPlayer();
-            }
-        }
-    }
-
-
-    private boolean selectGameMode() {
-        console.displayMessage(Messages.GAME_MODE_PROMPT);
-
-        while (console.promptingForInput()) {
-            String choice = console.getInputValue();
-
-            if (listenOnExitCmdAndShutdown(choice)) return false;
-
-            GameMode selected = GameMode.getByCode(choice);
-            if (selected == null) {
-                console.displayMessage(Messages.INVALID_CHOICE);
-                console.displayMessage(Messages.GAME_MODE_PROMPT);
-                continue;
-            }
-            game.setGameMode(selected);
-            console.displayMessage(Messages.SELECTED_MODE, selected.getLabel());
-            return true;
-        }
-        return false;
-    }
-
-    public boolean selectComputerDifficultyLevel() {
-        while (true) {
-            console.displayMessage(Messages.DIFFICULTY_PROMPT);
-            for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
-                console.displayMessage(Messages.DIFFICULTY_OPTION_FORMAT, level.getCode(), level.getLabel());
-            }
-
-            String choice = console.getInputValue();
-            if (listenOnExitCmdAndShutdown(choice)) return false;
-
-            ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
-            if (level == null) {
-                console.displayMessage(Messages.INVALID_CHOICE);
-                continue; // retry
-            }
-            // Sets up the computerMoveHandler which is used to determine the next move depending on the difficulty
-            game.setComputerDifficulty(level);
-            console.displayMessage(Messages.DIFFICULTY_SELECTED, level.getLabel());
-            return true;
-        }
-    }
-
-
-    private boolean listenOnExitCmdAndShutdown(String input) {
-        if (input.equalsIgnoreCase("exit")) {
-            shutdown();
-            return true;
-        }
-        return false;
+        game.play();
+        shutdown();
     }
 
     public void shutdown() {
+        if (!isRunning) return;
         isRunning = false;
         console.displayMessage(Messages.SHUTDOWN);
         console.close();

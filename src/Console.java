@@ -25,6 +25,7 @@ public class Console {
 
     public void displayMessage(String message) {
         output.println(message);
+        output.flush();
     }
 
     public void displayMessage(String format, Object... args) {
