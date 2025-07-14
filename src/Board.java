@@ -49,10 +49,15 @@ public class Board {
     }
 
     public void draw(char[][] gameBoard) {
-        console.displayMessage(Constants.MSG_GAMEBOARD_BORDER);
+        console.displayMessage(Messages.GAMEBOARD_BORDER);
         for (int i = 0; i < 3; i++) {
-            console.displayMessage(Constants.MSG_GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
+            console.displayMessage(Messages.GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
         }
-        console.displayMessage(Constants.MSG_GAMEBOARD_BORDER);
+        console.displayMessage(Messages.GAMEBOARD_BORDER);
+    }
+
+    private class Messages {
+        public static final String GAMEBOARD_BORDER = "-----------";
+        public static final String GAMEBOARD_CONTENT = " %c | %c | %c %n";
     }
 }

@@ -6,8 +6,8 @@ public class GameServer {
 
     public GameServer(Console console) {
         this.console = console;
-        this.game = new Game();
-        this.board = new Board();
+        this.game = new Game(console);
+        this.board = game.getBoard();
     }
 
     public static void main(String[] args) {
@@ -30,123 +30,70 @@ public class GameServer {
     private void initialize() {
         if (!selectGameMode()) return;
 
-        if (!game.hasGameMode()) {
-            console.displayMessage("No game mode selected. Exiting...");
-            shutdown();
-            return;
-        }
+        GameMode gameMode = game.getGameMode();
 
-        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
+        if (gameMode == GameMode.PLAYER_VS_COMPUTER) {
             if (!selectComputerDifficultyLevel()) return;
-
-            if (!game.hasComputerDifficulty()) {
-                console.displayMessage("No difficulty selected. Exiting...");
-                shutdown();
-                return;
-            }
         }
 
-        console.displayMessage(Constants.MSG_GAME_START);
+        game.setPlayers(gameMode);
+
+        console.displayMessage(Messages.GAME_START);
         isRunning = true;
     }
 
-
     public void start() {
-        if (!isRunning) return; // game wasn’t initialized properly
+        while (isRunning) {
+            Player currentPlayer = game.getCurrentPlayer();
+            int[] move = currentPlayer.getMove();
+            if (move == null) {
+                shutdown();
+                return;
+            }
+            if (!game.processPlayerMove(move[0], move[1])) {
+                console.displayMessage(Messages.INVALID_INPUT);
+                continue;
+            }
 
-        if (game.isComputerTurn()) {
-            handleComputerTurn();
-        } else {
-            promptForPlayerMove();
-        }
+            console.displayMessage(Messages.PLAYER_MOVE, currentPlayer.getSymbol(), move[0] + 1, move[1] + 1);
+            board.draw(board.getCopy());
 
-        while (isRunning && console.promptingForInput()) {
-            handlePlayerMove(console.getInputValue());
-        }
-    }
-
-
-    private void promptForPlayerMove() {
-        console.displayMessage(Constants.MSG_INPUT_PROMPT, game.getCurrentPlayerSymbol());
-    }
-
-    private void handleComputerTurn() {
-        console.displayMessage(Constants.MSG_THINKING);
-
-        int[] move = game.getComputerMove();
-        game.processPlayerMove(move[0], move[1]);
-        console.displayMessage(Constants.MSG_PLAYER_MOVE, game.getCurrentPlayerSymbol(), move[0] + 1, move[1] + 1);
-        board.draw(game.getBoard().getCopy());
-
-        if (checkGameOver()) return;
-
-        game.switchPlayer(); // switch to human
-        promptForPlayerMove();
-    }
-
-    public void handlePlayerMove(String moveString) {
-        if (listenOnExitCmdAndShutdown(moveString)) return;
-
-        int[] move = MoveParser.parse(moveString, console);
-        if (move == null || !game.processPlayerMove(move[0], move[1])) {
-            console.displayMessage(Constants.MSG_INVALID_INPUT);
-            return;
-        }
-
-        console.displayMessage(Constants.MSG_PLAYER_MOVE, game.getCurrentPlayerSymbol(), move[0] + 1, move[1] + 1);
-        board.draw(game.getBoard().getCopy());
-
-        if (checkGameOver()) return;
-
-        game.switchPlayer();
-
-        if (game.isComputerTurn()) {
-            handleComputerTurn();
-        } else {
-            promptForPlayerMove();
+            if (game.isGameOver()) {
+                console.displayMessage(game.getGameOverMessage());
+                shutdown();
+            } else {
+                game.switchPlayer();
+            }
         }
     }
 
-    public boolean checkGameOver() {
-        if (game.isGameOver()) {
-            console.displayMessage(game.getGameOverMessage());
-            shutdown();
-            return true;
-        }
-        return false;
-    }
 
     private boolean selectGameMode() {
+        console.displayMessage(Messages.GAME_MODE_PROMPT);
 
-//        while (console.promptMode()) {
-//
-//        }
-
-
-        while (true) {
-            console.displayMessage(Constants.MSG_GAME_MODE_PROMPT);
-            // demeter violation, lack of encapsulation of public members (input, output)
+        while (console.promptingForInput()) {
             String choice = console.getInputValue();
 
             if (listenOnExitCmdAndShutdown(choice)) return false;
 
             GameMode selected = GameMode.getByCode(choice);
             if (selected == null) {
-                console.displayMessage(Constants.MSG_INVALID_CHOICE);
-                continue; // retry
+                console.displayMessage(Messages.INVALID_CHOICE);
+                console.displayMessage(Messages.GAME_MODE_PROMPT);
+                continue;
             }
-
             game.setGameMode(selected);
-            console.displayMessage("Selected: " + selected.getLabel());
+            console.displayMessage(Messages.SELECTED_MODE, selected.getLabel());
             return true;
         }
+        return false;
     }
 
     public boolean selectComputerDifficultyLevel() {
         while (true) {
-            console.displayMessage("Select computer difficulty level:");
+            console.displayMessage(Messages.DIFFICULTY_PROMPT);
             for (ComputerDifficultyLevel level : ComputerDifficultyLevel.values()) {
-                console.displayMessage("%s - %s%n", level.getCode(), level.getLabel());
+                console.displayMessage(Messages.DIFFICULTY_OPTION_FORMAT, level.getCode(), level.getLabel());
             }
 
             String choice = console.getInputValue();
@@ -154,15 +101,16 @@ public class GameServer {
 
             ComputerDifficultyLevel level = ComputerDifficultyLevel.getByCode(choice);
             if (level == null) {
-                console.displayMessage(Constants.MSG_INVALID_CHOICE);
+                console.displayMessage(Messages.INVALID_CHOICE);
                 continue; // retry
             }
-
+            // Sets up the computerMoveHandler which is used to determine the next move depending on the difficulty
             game.setComputerDifficulty(level);
-            console.displayMessage("Computer difficulty level set to: " + level.getLabel());
+            console.displayMessage(Messages.DIFFICULTY_SELECTED, level.getLabel());
             return true;
         }
     }
+
 
     private boolean listenOnExitCmdAndShutdown(String input) {
         if (input.equalsIgnoreCase("exit")) {
@@ -174,7 +122,31 @@ public class GameServer {
 
     public void shutdown() {
         isRunning = false;
-        console.displayMessage(Constants.MSG_SHUTDOWN);
+        console.displayMessage(Messages.SHUTDOWN);
         console.close();
     }
+
+    public class Messages {
+        public static final String INVALID_CHOICE = "Select valid game mode";
+        public static final String SHUTDOWN = "Game server shutting down...";
+        public static final String THINKING = "Thinking...";
+        public static final String INVALID_INPUT = "Invalid input! Enter row and column (e.g., '1 2').";
+
+        public static final String GAME_MODE_PROMPT =
+                """
+                        Select game mode:
+                        1 - Player vs Player
+                        2 - Player vs Computer
+                        Enter your choice (1 or 2) or type 'exit' to quit:\s""";
+
+        public static final String GAME_START = "Game server is running...";
+        public static final String PLAYER_MOVE = "Player %c: %d %d%n";
+        public static final String INPUT_PROMPT = "Player %c, enter numbers for row and column and press Enter (type 'exit' to quit):%n";
+
+        public static final String DIFFICULTY_PROMPT = "Select computer difficulty level:";
+        public static final String DIFFICULTY_OPTION_FORMAT = "%s - %s%n";
+        public static final String DIFFICULTY_SELECTED = "Computer difficulty level set to: %s";
+        public static final String SELECTED_MODE = "Selected: %s";
+    }
+
 }

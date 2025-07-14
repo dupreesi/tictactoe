@@ -9,7 +9,10 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        game = new Game();
+        game = new Game(new Console());
+        Player playerX = new HumanPlayer('X', new Console());
+        Player playerO = new HumanPlayer('O', new Console());
+        game.setPlayers(playerX, playerO);
     }
 
     @Test
@@ -39,11 +42,11 @@ class GameTest {
 
     @Test
     void testMultipleMoves() {
-        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol()); // X
         game.switchPlayer();
-        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol()); // O
         game.switchPlayer();
-        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol()); // X
 
         assertEquals('X', game.getBoard().getCell(0, 0));
         assertEquals('O', game.getBoard().getCell(1, 1));
@@ -58,8 +61,8 @@ class GameTest {
     @Test
     void detectWinnerHorizontally() {
         game.getBoard().makeMove(0, 0, game.getCurrentPlayerSymbol());
-        game.getBoard().makeMove(1, 1, game.getCurrentPlayerSymbol());
-        game.getBoard().makeMove(2, 2, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(0, 1, game.getCurrentPlayerSymbol());
+        game.getBoard().makeMove(0, 2, game.getCurrentPlayerSymbol());
         assertTrue(game.isWinningMove());
     }
 
@@ -89,15 +92,16 @@ class GameTest {
 
     @Test
     void getCurrentPlayerAndSwitchType() {
-        assertEquals(game.getCurrentPlayerSymbol(), 'X');
+        assertEquals('X', game.getCurrentPlayerSymbol());
         game.switchPlayer();
-        assertEquals(game.getCurrentPlayerSymbol(), 'O');
+        assertEquals('O', game.getCurrentPlayerSymbol());
     }
 
     @Test
     void handleRandomComputerMove() {
-        ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
         game.setComputerDifficulty(ComputerDifficultyLevel.EASY);
+
+        ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
 
         game.getBoard().makeMove(0, 2, game.getCurrentPlayerSymbol());
         game.switchPlayer();
