@@ -26,19 +26,10 @@ public class GameServer {
     }
 
     private void initialize() {
-        if (!game.selectGameMode()) {
+        if (!game.setup()) {
             shutdown();
             return;
         }
-
-        if (game.getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
-            if (!game.selectComputerDifficultyLevel()) {
-                shutdown();
-                return;
-            }
-        }
-
-        game.selectPlayersByGameMode(game.getGameMode());
         console.displayMessage(Messages.GAME_START);
         isRunning = true;
     }
@@ -59,7 +50,6 @@ public class GameServer {
     public class Messages {
         public static final String INVALID_CHOICE = "Select valid game mode";
         public static final String SHUTDOWN = "Game server shutting down...";
-        public static final String THINKING = "Thinking...";
         public static final String INVALID_INPUT = "Invalid input! Enter row and column (e.g., '1 2').";
 
         public static final String GAME_MODE_PROMPT =

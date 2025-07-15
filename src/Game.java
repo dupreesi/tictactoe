@@ -94,10 +94,6 @@ public class Game {
         return "";
     }
 
-    public void setComputerDifficulty(ComputerDifficultyLevel level) {
-        this.computerMoveHandler = ComputerMoveFactory.getComputerMoveHandler(level, this.getBoard());
-    }
-
     public void play() {
         isRunning = true;
         while (isRunning) {
@@ -122,6 +118,21 @@ public class Game {
                 switchPlayer();
             }
         }
+    }
+
+    public boolean setup() {
+        if (!selectGameMode()) {
+            return false;
+        }
+
+        if (getGameMode() == GameMode.PLAYER_VS_COMPUTER) {
+            if (!selectComputerDifficultyLevel()) {
+                return false;
+            }
+        }
+
+        selectPlayersByGameMode(getGameMode());
+        return true;
     }
 
     public boolean selectGameMode() {
@@ -170,6 +181,9 @@ public class Game {
         }
     }
 
+    public void setComputerDifficulty(ComputerDifficultyLevel level) {
+        this.computerMoveHandler = ComputerMoveFactory.getComputerMoveHandler(level, this.getBoard());
+    }
 
     public static class Messages {
         public static final String DRAW = "The game is a draw!";
