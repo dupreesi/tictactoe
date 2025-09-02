@@ -1,63 +1,57 @@
+import java.util.Arrays;
+
 public class Board {
-    private char[][] board;
+    private char[] board;
     private Console console;
 
     public Board() {
-        board = new char[3][3];
+        board = new char[9];
         console = new Console();
         clear();
     }
 
-
     public void clear() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = ' ';
-            }
-        }
+        Arrays.fill(board, ' ');
     }
 
     public boolean isFull() {
-        for (char[] row : board) {
-            for (char cell : row) {
-                if (cell == ' ') {
-                    return false;
-                }
+        for (char cell : board) {
+            if (cell == ' ') {
+                return false;
             }
         }
         return true;
     }
 
-
-    public boolean isValidMove(int row, int col) {
-        return row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == ' ';
+    public boolean isValidMove(int position) {
+        return position >= 0 && position < 9 && board[position] == ' ';
     }
 
-    public void makeMove(int row, int col, char player) {
-        board[row][col] = player;
+    public void makeMove(int position, char player) {
+        board[position] = player;
     }
 
-    public char getCell(int row, int col) {
-        return board[row][col];
+    public char getCell(int position) {
+        return board[position];
     }
 
-    public char[][] getCopy() {
-        char[][] copy = new char[3][3];
-        for (int i = 0; i < 3; i++)
-            System.arraycopy(board[i], 0, copy[i], 0, 3);
-        return copy;
+    public char[] getCopy() {
+        return Arrays.copyOf(board, board.length);
     }
 
-    public void draw(char[][] gameBoard) {
+    public void draw() {
         console.displayMessage(Messages.GAMEBOARD_BORDER);
-        for (int i = 0; i < 3; i++) {
-            console.displayMessage(Messages.GAMEBOARD_CONTENT, gameBoard[i][0], gameBoard[i][1], gameBoard[i][2]);
-        }
+        console.displayMessage(Messages.GAMEBOARD_CONTENT, board[0], board[1], board[2]);
+        console.displayMessage(Messages.GAMEBOARD_BORDER_MID);
+        console.displayMessage(Messages.GAMEBOARD_CONTENT, board[3], board[4], board[5]);
+        console.displayMessage(Messages.GAMEBOARD_BORDER_MID);
+        console.displayMessage(Messages.GAMEBOARD_CONTENT, board[6], board[7], board[8]);
         console.displayMessage(Messages.GAMEBOARD_BORDER);
     }
 
     private class Messages {
         public static final String GAMEBOARD_BORDER = "-----------";
+        public static final String GAMEBOARD_BORDER_MID = "---|---|---";
         public static final String GAMEBOARD_CONTENT = " %c | %c | %c %n";
     }
 }

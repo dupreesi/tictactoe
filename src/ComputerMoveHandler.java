@@ -1,3 +1,3 @@
 public interface ComputerMoveHandler {
-    int[] getNextMove();
+    int getNextMove();
 }

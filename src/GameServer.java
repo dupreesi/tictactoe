@@ -41,8 +41,9 @@ public class GameServer {
     }
 
     public void shutdown() {
-        if (!isRunning) return;
-        isRunning = false;
+        if (isRunning) {
+            isRunning = false;
+        }
         console.displayMessage(Messages.SHUTDOWN);
         console.close();
     }
@@ -50,7 +51,7 @@ public class GameServer {
     public class Messages {
         public static final String INVALID_CHOICE = "Select valid game mode";
         public static final String SHUTDOWN = "Game server shutting down...";
-        public static final String INVALID_INPUT = "Invalid input! Enter row and column (e.g., '1 2').";
+        public static final String INVALID_INPUT = "Invalid input! Enter a number between 1 and 9.";
 
         public static final String GAME_MODE_PROMPT =
                 """
@@ -60,8 +61,8 @@ public class GameServer {
                         Enter your choice (1 or 2) or type 'exit' to quit:\s""";
 
         public static final String GAME_START = "Game server is running...";
-        public static final String PLAYER_MOVE = "Player %c: %d %d%n";
-        public static final String INPUT_PROMPT = "Player %c, enter numbers for row and column and press Enter (type 'exit' to quit):%n";
+        public static final String PLAYER_MOVE = "Player %c: %d%n";
+        public static final String INPUT_PROMPT = "Player %c, enter a number between 1 and 9 and press Enter (type 'exit' to quit):%n";
 
         public static final String DIFFICULTY_PROMPT = "Select computer difficulty level:";
         public static final String DIFFICULTY_OPTION_FORMAT = "%s - %s%n";

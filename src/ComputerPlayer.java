@@ -13,7 +13,7 @@ public class ComputerPlayer implements Player {
     }
 
     @Override
-    public int[] getMove() {
+    public int getMove() {
         return handler.getNextMove();
     }
 }

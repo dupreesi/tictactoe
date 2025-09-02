@@ -35,42 +35,42 @@ class GameServerTest {
 
     @Test
     void shouldRunGameServerViaMainLogic() {
-        String output = runGameWithInput("1\n1 1\n1 2\nexit");
+        String output = runGameWithInput("1\n1\n2\nexit");
         assertOutputContains(output,
                 GameServer.Messages.GAME_MODE_PROMPT,
                 "Player vs Player",
                 GameServer.Messages.GAME_START,
-                "Player X: 1 1",
-                "Player O: 1 2",
+                "Player X: 1",
+                "Player O: 2",
                 GameServer.Messages.SHUTDOWN);
     }
 
     @Test
-    void shouldNotProcessPositionBiggerThree() {
-        String output = runGameWithInput("1\n1 4\nexit");
+    void shouldNotProcessPositionBiggerThanNine() {
+        String output = runGameWithInput("1\n10\nexit");
         assertOutputContains(output, GameServer.Messages.INVALID_INPUT);
     }
 
     @Test
     void shouldNotAllowDuplicatePositions() {
-        String output = runGameWithInput("1\n1 1\n1 1\nexit");
+        String output = runGameWithInput("1\n1\n1\nexit");
         assertOutputContains(output,
-                "Player X: 1 1",
+                "Player X: 1",
                 GameServer.Messages.INVALID_INPUT);
     }
 
     @Test
     void shouldDrawGameBoard() {
-        String input = "1\n1 1\n1 2\n1 3\n2 1\n2 3\n2 2\n3 1\n3 3\n3 2\nexit";
+        // Fill the board completely for a draw: positions 1,2,3,4,5,6,7,8,9 (user input) = positions 0,1,2,3,4,5,6,7,8 (internal)
+        String input = "1\n1\n2\n3\n4\n6\n5\n7\n9\n8\nexit";
         String output = runGameWithInput(input);
 
         assertOutputContains(output,
-                "Player X: 1 1", "Player O: 1 2", "Player X: 1 3",
-                "Player O: 2 1", "Player X: 2 3", "Player O: 2 2",
-                "Player X: 3 1", "Player O: 3 3", "Player X: 3 2",
+                "Player X: 1", "Player O: 2", "Player X: 3",
+                "Player O: 4", "Player X: 6", "Player O: 5",
+                "Player X: 7", "Player O: 9", "Player X: 8",
                 Game.Messages.DRAW);
     }
-
 
     @Test
     void shouldHandleShutdownCommand() {

@@ -13,18 +13,18 @@ public class HumanPlayer implements Player {
     }
 
     @Override
-    public int[] getMove() {
+    public int getMove() {
         console.displayMessage(GameServer.Messages.INPUT_PROMPT, symbol);
         while (true) {
             String input = console.getInputValue();
             if (input == null || input.equalsIgnoreCase("exit")) {
-                return null;
+                return -1; // Return -1 to indicate exit/cancel
             }
 
-            int[] move = MoveParser.parse(input, console);
-            if (move != null) return move;
+            int move = MoveParser.parse(input, console);
+            if (move != -1) return move;
 
-            console.displayMessage(GameServer.Messages.INVALID_INPUT);
+            // Error message is already displayed by MoveParser, so don't duplicate it
         }
     }
 }

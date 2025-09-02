@@ -63,7 +63,7 @@ public class Game {
         return isWinningMove() || getBoard().isFull();
     }
 
-    public int[] getComputerMove() {
+    public int getComputerMove() {
         if (computerMoveHandler == null) {
             throw new IllegalStateException(Messages.COMPUTER_HANDLER_NOT_INITIALIZED);
         }
@@ -72,19 +72,26 @@ public class Game {
 
     public boolean isWinningMove() {
         char symbol = currentPlayer.getSymbol();
-        for (int i = 0; i < 3; i++) {
-            if ((board.getCell(i, 0) == symbol && board.getCell(i, 1) == symbol && board.getCell(i, 2) == symbol) ||
-                    (board.getCell(0, i) == symbol && board.getCell(1, i) == symbol && board.getCell(2, i) == symbol)) {
-                return true;
-            }
+        // Check rows: 0-2, 3-5, 6-8
+        if ((board.getCell(0) == symbol && board.getCell(1) == symbol && board.getCell(2) == symbol) ||
+            (board.getCell(3) == symbol && board.getCell(4) == symbol && board.getCell(5) == symbol) ||
+            (board.getCell(6) == symbol && board.getCell(7) == symbol && board.getCell(8) == symbol)) {
+            return true;
         }
-        return (board.getCell(0, 0) == symbol && board.getCell(1, 1) == symbol && board.getCell(2, 2) == symbol) ||
-                (board.getCell(0, 2) == symbol && board.getCell(1, 1) == symbol && board.getCell(2, 0) == symbol);
+        // Check columns: 0-3-6, 1-4-7, 2-5-8
+        if ((board.getCell(0) == symbol && board.getCell(3) == symbol && board.getCell(6) == symbol) ||
+            (board.getCell(1) == symbol && board.getCell(4) == symbol && board.getCell(7) == symbol) ||
+            (board.getCell(2) == symbol && board.getCell(5) == symbol && board.getCell(8) == symbol)) {
+            return true;
+        }
+        // Check diagonals: 0-4-8, 2-4-6
+        return (board.getCell(0) == symbol && board.getCell(4) == symbol && board.getCell(8) == symbol) ||
+               (board.getCell(2) == symbol && board.getCell(4) == symbol && board.getCell(6) == symbol);
     }
 
-    public boolean processPlayerMove(int row, int col) {
-        if (!getBoard().isValidMove(row, col)) return false;
-        getBoard().makeMove(row, col, getCurrentPlayerSymbol());
+    public boolean processPlayerMove(int position) {
+        if (!getBoard().isValidMove(position)) return false;
+        getBoard().makeMove(position, getCurrentPlayerSymbol());
         return true;
     }
 
@@ -98,18 +105,18 @@ public class Game {
         isRunning = true;
         while (isRunning) {
             Player currentPlayer = getCurrentPlayer();
-            int[] move = currentPlayer.getMove();
-            if (move == null) {
+            int move = currentPlayer.getMove();
+            if (move == -1) {
                 isRunning = false;
                 break;
             }
-            if (!processPlayerMove(move[0], move[1])) {
+            if (!processPlayerMove(move)) {
                 console.displayMessage(GameServer.Messages.INVALID_INPUT);
                 continue;
             }
 
-            console.displayMessage(GameServer.Messages.PLAYER_MOVE, currentPlayer.getSymbol(), move[0] + 1, move[1] + 1);
-            board.draw(board.getCopy());
+            console.displayMessage(GameServer.Messages.PLAYER_MOVE, currentPlayer.getSymbol(), move + 1);
+            board.draw();
 
             if (isGameOver()) {
                 console.displayMessage(getGameOverMessage());

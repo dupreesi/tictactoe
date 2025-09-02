@@ -9,24 +9,22 @@ public class ComputerMoveRandom implements ComputerMoveHandler {
         this.gameBoard = gameBoard;
     }
 
-    public List<int[]> getRemainingValidMoves() {
-        List<int[]> validMoves = new ArrayList<>();
-        for (int row = 0; row < 3; row++) {            // board size is 3x3, so loop from 0 to 2
-            for (int col = 0; col < 3; col++) {
-                if (gameBoard.getCell(row, col) == ' ') {   // use getCell() instead of array access
-                    validMoves.add(new int[]{row, col});
-                }
+    public List<Integer> getRemainingValidMoves() {
+        List<Integer> validMoves = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            if (gameBoard.isValidMove(i)) {
+                validMoves.add(i);
             }
         }
         return validMoves;
     }
 
     @Override
-    public int[] getNextMove() {
-        List<int[]> remainingMoves = getRemainingValidMoves();
+    public int getNextMove() {
+        List<Integer> remainingMoves = getRemainingValidMoves();
 
         if (remainingMoves.isEmpty()) {
-            return null;
+            return -1; // No moves available
         }
         Random random = new Random();
         return remainingMoves.get(random.nextInt(remainingMoves.size()));

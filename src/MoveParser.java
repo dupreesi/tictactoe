@@ -1,21 +1,20 @@
 public class MoveParser {
-    public static int[] parse(String input, Console console) {
-        String[] parts = input.trim().split(" ");
-        if (parts.length != 2) {
-            console.displayMessage(Messages.INVALID_NUMBERS);
-            return null;
-        }
+    public static int parse(String input, Console console) {
         try {
-            int row = Integer.parseInt(parts[0]) - 1;
-            int col = Integer.parseInt(parts[1]) - 1;
-            return new int[]{row, col};
+            int position = Integer.parseInt(input.trim()) - 1; // Convert 1-9 input to 0-8 index
+            if (position < 0 || position > 8) {
+                console.displayMessage(GameServer.Messages.INVALID_INPUT);
+                return -1;
+            }
+            return position;
         } catch (NumberFormatException e) {
-            console.displayMessage(Messages.INVALID_NUMBERS);
-            return null;
+            console.displayMessage(GameServer.Messages.INVALID_INPUT);
+            return -1;
         }
     }
 
     public class Messages {
-        public static final String INVALID_NUMBERS = "Invalid input! Enter numbers only.";
+        public static final String INVALID_NUMBERS = "Invalid input! Enter a number from 1 to 9.";
+        public static final String INVALID_POSITION = "Invalid position! Enter a number from 1 to 9.";
     }
 }
