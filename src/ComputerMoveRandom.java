@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,19 +8,9 @@ public class ComputerMoveRandom implements ComputerMoveHandler {
         this.gameBoard = gameBoard;
     }
 
-    public List<Integer> getRemainingValidMoves() {
-        List<Integer> validMoves = new ArrayList<>();
-        for (int i = 0; i < 9; i++) {
-            if (gameBoard.isValidMove(i)) {
-                validMoves.add(i);
-            }
-        }
-        return validMoves;
-    }
-
     @Override
     public int getNextMove() {
-        List<Integer> remainingMoves = getRemainingValidMoves();
+        List<Integer> remainingMoves = Utils.getRemainingValidMoves(gameBoard);
 
         if (remainingMoves.isEmpty()) {
             return -1; // No moves available

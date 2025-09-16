@@ -63,13 +63,6 @@ public class Game {
         return isWinningMove() || getBoard().isFull();
     }
 
-    public int getComputerMove() {
-        if (computerMoveHandler == null) {
-            throw new IllegalStateException(Messages.COMPUTER_HANDLER_NOT_INITIALIZED);
-        }
-        return computerMoveHandler.getNextMove();
-    }
-
     public boolean isWinningMove() {
         char symbol = currentPlayer.getSymbol();
         // Check rows: 0-2, 3-5, 6-8

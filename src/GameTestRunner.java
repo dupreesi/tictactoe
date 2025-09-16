@@ -203,11 +203,11 @@ public class GameTestRunner {
             Game game = new Game(new Console());
             ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
 
-            int initialMoves = computerMoveRandom.getRemainingValidMoves().size();
+            int initialMoves = Utils.getRemainingValidMoves(game.getBoard()).size();
             boolean test1 = initialMoves == 9;
 
             game.getBoard().makeMove(2, 'X'); // Position 2
-            int movesAfterOne = computerMoveRandom.getRemainingValidMoves().size();
+            int movesAfterOne = Utils.getRemainingValidMoves(game.getBoard()).size();
             boolean test2 = movesAfterOne == 8;
 
             int nextMove = computerMoveRandom.getNextMove();

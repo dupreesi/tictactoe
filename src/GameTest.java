@@ -1,7 +1,4 @@
 import org.junit.jupiter.api.*;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameTest {
@@ -101,17 +98,20 @@ class GameTest {
     }
 
     @Test
-    void handleRandomComputerMove() {
-        // Test computer move generation with 1D positions
-        ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
-
+    void getRemainingValidMoves() {
         // Initially, all 9 positions should be available
-        assertEquals(9, computerMoveRandom.getRemainingValidMoves().size());
+        assertEquals(9, Utils.getRemainingValidMoves(game.getBoard()).size());
 
         // Make a move and verify one less position is available
         game.getBoard().makeMove(2, 'X'); // Position 2
-        assertEquals(8, computerMoveRandom.getRemainingValidMoves().size());
+        assertEquals(8, Utils.getRemainingValidMoves(game.getBoard()).size());
 
+    }
+
+    @Test
+    void handleRandomComputerMove() {
+        // Test computer move generation with 1D positions
+        ComputerMoveRandom computerMoveRandom = new ComputerMoveRandom(game.getBoard());
         // Get next computer move and verify it's valid
         int nextMove = computerMoveRandom.getNextMove();
         assertNotEquals(-1, nextMove); // Should not be -1 (no move available)
@@ -150,17 +150,40 @@ class GameTest {
     @Test
     void testBoardFullDetection() {
         // Fill board without winning
-        game.getBoard().makeMove(0, 'X'); // X
-        game.getBoard().makeMove(1, 'O'); // O
-        game.getBoard().makeMove(2, 'X'); // X
-        game.getBoard().makeMove(3, 'O'); // O
-        game.getBoard().makeMove(4, 'X'); // X
-        game.getBoard().makeMove(5, 'O'); // O
-        game.getBoard().makeMove(6, 'O'); // O
-        game.getBoard().makeMove(7, 'X'); // X
-        game.getBoard().makeMove(8, 'O'); // O
+        createFullBoard();
 
         assertTrue(game.getBoard().isFull());
         assertTrue(game.isGameOver());
+    }
+
+    @Test
+    void handleMinimaxComputerMove() {
+        ComputerMoveMinimax computerMoveRandom = new ComputerMoveMinimax(game.getBoard());
+        createFullBoard();
+
+        assertEquals(0, computerMoveRandom.getNextMove());
+    }
+
+    // research convert board as a tree
+    // < 300ms response time for minimax
+    // test cases (test the board state not the algorithm)
+        // full board
+        // switch between min max
+        // one move left
+        // two moves left
+        // prevent fork 1 and 2
+
+
+
+    private void createFullBoard() {
+        game.getBoard().makeMove(0, 'X');
+        game.getBoard().makeMove(1, 'O');
+        game.getBoard().makeMove(2, 'X');
+        game.getBoard().makeMove(3, 'O');
+        game.getBoard().makeMove(4, 'X');
+        game.getBoard().makeMove(5, 'O');
+        game.getBoard().makeMove(6, 'O');
+        game.getBoard().makeMove(7, 'X');
+        game.getBoard().makeMove(8, 'O');
     }
 }
